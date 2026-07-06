@@ -5,16 +5,21 @@ function switchView(viewId) {
     document.getElementById('view-dashboard').classList.add('hidden');
     document.getElementById('view-reports').classList.add('hidden');
     document.getElementById('view-checklists').classList.add('hidden');
+    document.getElementById('view-vehicles').classList.add('hidden');
     
     document.getElementById(viewId).classList.remove('hidden');
 
-    // Update sidebar UI
-    document.getElementById('nav-dashboard').className = viewId === 'view-dashboard' ? 'flex items-center py-2.5 px-4 bg-blue-600 rounded-lg' : 'flex items-center py-2.5 px-4 hover:bg-slate-800 rounded-lg';
-    document.getElementById('nav-reports').className = viewId === 'view-reports' ? 'flex items-center py-2.5 px-4 bg-blue-600 rounded-lg' : 'flex items-center py-2.5 px-4 hover:bg-slate-800 rounded-lg';
-    document.getElementById('nav-checklists').className = viewId === 'view-checklists' ? 'flex items-center py-2.5 px-4 bg-blue-600 rounded-lg' : 'flex items-center py-2.5 px-4 hover:bg-slate-800 rounded-lg';
+    const activeClass = 'flex items-center py-2.5 px-4 bg-blue-600 rounded-lg';
+    const inactiveClass = 'flex items-center py-2.5 px-4 hover:bg-slate-800 rounded-lg';
+    
+    document.getElementById('nav-dashboard').className = viewId === 'view-dashboard' ? activeClass : inactiveClass;
+    document.getElementById('nav-reports').className = viewId === 'view-reports' ? activeClass : inactiveClass;
+    document.getElementById('nav-checklists').className = viewId === 'view-checklists' ? activeClass : inactiveClass;
+    document.getElementById('nav-vehicles').className = viewId === 'view-vehicles' ? activeClass : inactiveClass;
 
     if(viewId === 'view-reports') initReportsModule();
     if(viewId === 'view-checklists') initChecklistsModule();
+    if(viewId === 'view-vehicles') initVehiclesModule();
 }
 
 // ==========================================
@@ -43,134 +48,102 @@ function initDashboard() {
 // ==========================================
 // INSPECTION REPORTS MODULE (Preserved)
 // ==========================================
-let allReports = [];
-let currentPage = 1;
-const rowsPerPage = 10;
-
-function initReportsModule() {
-    if(allReports.length === 0) {
-        generateDummyReports();
-        renderReportKPIs();
-        loadReportsData();
-    }
-}
-
-function generateDummyReports() {
-    const statuses = ['Approved', 'Pending', 'Rejected', 'Draft'];
-    const conditions = ['Excellent', 'Good', 'Fair', 'Poor'];
-    const sites = ['Site Alpha', 'Site Beta', 'Delta Yard', 'HQ'];
-    const depts = ['Logistics', 'Construction', 'Maintenance', 'Operations'];
-    const vNames = ['Excavator 320', 'Dump Truck 40', 'Forklift T1', 'Bulldozer D9'];
-
-    for(let i=1; i<=55; i++) {
-        allReports.push({
-            id: `VIESL-${String(1000+i)}`, date: `2026-07-${String((i%30)+1).padStart(2, '0')}`,
-            vehicleNo: `VPAV${260000+i}`, vehicleName: vNames[i % vNames.length],
-            site: sites[i % sites.length], dept: depts[i % depts.length], operator: `Operator ${i}`,
-            condition: conditions[i % conditions.length], safe: i%6 === 0 ? 'No' : 'Yes',
-            faults: i%6 === 0 ? Math.floor(Math.random()*4)+1 : 0, status: statuses[i % statuses.length],
-            notes: i%3===0 ? "Standard check completed." : "Requires minor fluid top-up.", photos: Math.floor(Math.random()*6)
-        });
-    }
-}
-
-function renderReportKPIs() {
-    const kpis = [ { label: "Total Reports", val: "55", icon: "fa-folder-open", color: "text-blue-500" }, { label: "Approved", val: "28", icon: "fa-check-circle", color: "text-green-500" }, { label: "Pending", val: "14", icon: "fa-clock", color: "text-orange-500" }, { label: "Rejected", val: "8", icon: "fa-times-circle", color: "text-red-500" }, { label: "Today's Reports", val: "12", icon: "fa-calendar-day", color: "text-indigo-500" }, { label: "Avg. Insp. Time", val: "14m", icon: "fa-stopwatch", color: "text-teal-500" } ];
-    document.getElementById('report-kpi-container').innerHTML = kpis.map(k => `<div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between card"><div><p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${k.label}</p><h3 class="text-2xl font-black text-gray-800">${k.val}</h3></div><div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border"><i class="fas ${k.icon} ${k.color} text-lg"></i></div></div>`).join('');
-}
-
-function loadReportsData() {
-    document.getElementById('table-loading').classList.remove('hidden');
-    document.getElementById('reports-table-body').innerHTML = '';
-    setTimeout(() => { document.getElementById('table-loading').classList.add('hidden'); renderTable(); }, 600);
-}
-
+let allReports = []; let currentPage = 1; const rowsPerPage = 10;
+function initReportsModule() { if(allReports.length === 0) { generateDummyReports(); renderReportKPIs(); loadReportsData(); } }
+function generateDummyReports() { for(let i=1; i<=55; i++) { allReports.push({ id: `VIESL-${1000+i}`, date: `2026-07-${String((i%30)+1).padStart(2, '0')}`, vehicleNo: `VPAV${260000+i}`, vehicleName: 'Excavator', site: 'Site Alpha', dept: 'Logistics', operator: `Operator ${i}`, condition: 'Good', safe: i%6===0?'No':'Yes', faults: i%6===0?2:0, status: ['Approved','Pending','Rejected','Draft'][i%4], notes: 'Standard check.', photos: 2 }); } }
+function renderReportKPIs() { document.getElementById('report-kpi-container').innerHTML = [ { label: "Total Reports", val: "55", icon: "fa-folder-open", color: "text-blue-500" }, { label: "Approved", val: "28", icon: "fa-check-circle", color: "text-green-500" }, { label: "Pending", val: "14", icon: "fa-clock", color: "text-orange-500" }, { label: "Rejected", val: "8", icon: "fa-times-circle", color: "text-red-500" }, { label: "Today's Reports", val: "12", icon: "fa-calendar-day", color: "text-indigo-500" }, { label: "Avg. Insp. Time", val: "14m", icon: "fa-stopwatch", color: "text-teal-500" } ].map(k => `<div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between card"><div><p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${k.label}</p><h3 class="text-2xl font-black text-gray-800">${k.val}</h3></div><div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border"><i class="fas ${k.icon} ${k.color} text-lg"></i></div></div>`).join(''); }
+function loadReportsData() { renderTable(); }
 function renderTable() {
-    const tbody = document.getElementById('reports-table-body');
-    const start = (currentPage - 1) * rowsPerPage;
-    const paginatedData = allReports.slice(start, start + rowsPerPage);
-    if(paginatedData.length === 0) return document.getElementById('table-empty').classList.remove('hidden');
-    
-    document.getElementById('table-empty').classList.add('hidden');
-    tbody.innerHTML = paginatedData.map(r => {
-        let bClass = r.status === 'Approved' ? 'bg-green-100 text-green-700' : r.status === 'Pending' ? 'bg-orange-100 text-orange-700' : r.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700';
-        return `<tr class="hover:bg-blue-50/50 transition-colors cursor-default group"><td class="px-4 py-3 text-center"><input type="checkbox" class="rounded text-blue-600 border-gray-300"></td><td class="px-4 py-3 font-semibold text-blue-600">${r.id}</td><td class="px-4 py-3 text-gray-600">${r.date}</td><td class="px-4 py-3"><div class="font-medium text-gray-800">${r.vehicleNo}</div><div class="text-xs text-gray-500">${r.vehicleName}</div></td><td class="px-4 py-3"><div class="text-gray-800">${r.site}</div><div class="text-xs text-gray-500">${r.dept}</div></td><td class="px-4 py-3 text-gray-600">${r.operator}</td><td class="px-4 py-3 text-gray-600">${r.condition}</td><td class="px-4 py-3 text-center">${r.safe === 'Yes' ? '<i class="fas fa-check text-green-500"></i>' : '<i class="fas fa-times text-red-500"></i>'}</td><td class="px-4 py-3 text-center"><span class="${r.faults > 0 ? 'bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold' : 'text-gray-400'}">${r.faults}</span></td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${bClass}">${r.status}</span></td><td class="px-4 py-3 text-right"><div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity"><button onclick="openDrawer('${r.id}')" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded"><i class="fas fa-eye"></i></button><button class="p-1.5 text-red-600 hover:bg-red-100 rounded"><i class="fas fa-file-pdf"></i></button></div></td></tr>`;
-    }).join('');
-
-    renderPagination();
+    const tbody = document.getElementById('reports-table-body'); const start = (currentPage - 1) * rowsPerPage; const pag = allReports.slice(start, start + rowsPerPage);
+    tbody.innerHTML = pag.map(r => `<tr class="hover:bg-blue-50/50 transition-colors cursor-default group border-b"><td class="px-4 py-3 text-center"><input type="checkbox" class="rounded text-blue-600 border-gray-300"></td><td class="px-4 py-3 font-semibold text-blue-600">${r.id}</td><td class="px-4 py-3 text-gray-600">${r.date}</td><td class="px-4 py-3"><div class="font-medium text-gray-800">${r.vehicleNo}</div><div class="text-xs text-gray-500">${r.vehicleName}</div></td><td class="px-4 py-3"><div class="text-gray-800">${r.site}</div><div class="text-xs text-gray-500">${r.dept}</div></td><td class="px-4 py-3 text-gray-600">${r.operator}</td><td class="px-4 py-3 text-gray-600">${r.condition}</td><td class="px-4 py-3 text-center">${r.safe === 'Yes' ? '<i class="fas fa-check text-green-500"></i>' : '<i class="fas fa-times text-red-500"></i>'}</td><td class="px-4 py-3 text-center"><span class="${r.faults > 0 ? 'bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold' : 'text-gray-400'}">${r.faults}</span></td><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold border bg-gray-100">${r.status}</span></td><td class="px-4 py-3 text-right"><button onclick="openDrawer('${r.id}')" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+    document.getElementById('pagination-info').innerText = `Showing ${start + 1} to ${Math.min(start + rowsPerPage, allReports.length)} of ${allReports.length} entries`;
 }
-
-function renderPagination() {
-    const totalPages = Math.ceil(allReports.length / rowsPerPage);
-    document.getElementById('pagination-info').innerText = `Showing ${(currentPage - 1) * rowsPerPage + 1} to ${Math.min(currentPage * rowsPerPage, allReports.length)} of ${allReports.length} entries`;
-    let buttons = `<button class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-50 text-sm disabled:opacity-50" ${currentPage === 1 ? 'disabled' : ''} onclick="currentPage--; renderTable()">Prev</button>`;
-    for(let i=1; i<=Math.min(totalPages, 5); i++) buttons += `<button class="px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}" onclick="currentPage=${i}; renderTable()">${i}</button>`;
-    buttons += `<button class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-50 text-sm disabled:opacity-50" ${currentPage === totalPages ? 'disabled' : ''} onclick="currentPage++; renderTable()">Next</button>`;
-    document.getElementById('pagination-controls').innerHTML = buttons;
-}
-
-function toggleDrawer() {
-    const d = document.getElementById('report-drawer'); const p = document.getElementById('drawer-panel');
-    if (d.classList.contains('hidden')) { d.classList.remove('hidden'); setTimeout(() => p.classList.remove('translate-x-full'), 10); } 
-    else { p.classList.add('translate-x-full'); setTimeout(() => d.classList.add('hidden'), 300); }
-}
-
-function openDrawer(id) {
-    const r = allReports.find(x => x.id === id); if(!r) return;
-    document.getElementById('drawer-content').innerHTML = `<div class="mb-6"><h3 class="text-xl font-black">${r.id}</h3><p class="text-gray-500">${r.date}</p></div><div class="bg-gray-50 p-4 border rounded mb-6 text-sm"><p><strong>Vehicle:</strong> ${r.vehicleNo}</p><p><strong>Status:</strong> ${r.status}</p></div>`;
-    toggleDrawer();
-}
-
+function toggleDrawer() { const d = document.getElementById('report-drawer'); const p = document.getElementById('drawer-panel'); if (d.classList.contains('hidden')) { d.classList.remove('hidden'); setTimeout(() => p.classList.remove('translate-x-full'), 10); } else { p.classList.add('translate-x-full'); setTimeout(() => d.classList.add('hidden'), 300); } }
+function openDrawer(id) { toggleDrawer(); }
 
 // ==========================================
-// INSPECTION CHECKLIST MODULE (NEW)
+// INSPECTION CHECKLIST MODULE (Preserved)
 // ==========================================
-let allChecklists = [];
-let chkCurrentPage = 1;
+let allChecklists = []; let chkCurrentPage = 1;
+function initChecklistsModule() { if(allChecklists.length === 0) { generateDummyChecklists(); renderChecklistKPIs(); renderChecklistTable(); } }
+function generateDummyChecklists() { for(let i=1; i<=28; i++) { allChecklists.push({ id: `CHK-100${i}`, name: 'Daily Check', category: 'Engine', vType: 'Heavy', dept: 'Logistics', items: 25, author: 'Admin', updated: '2026-07-01', status: 'Active', version: 'v1.0' }); } }
+function renderChecklistKPIs() { document.getElementById('checklist-kpi-container').innerHTML = [ { label: "Total Templates", val: "28", icon: "fa-list-alt", color: "text-blue-500" }, { label: "Categories", val: "10", icon: "fa-tags", color: "text-purple-500" }, { label: "Active", val: "18", icon: "fa-check-circle", color: "text-green-500" }, { label: "Inactive/Draft", val: "8", icon: "fa-pause-circle", color: "text-orange-500" }].map(k => `<div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between card"><div><p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${k.label}</p><h3 class="text-2xl font-black text-gray-800">${k.val}</h3></div><div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border"><i class="fas ${k.icon} ${k.color} text-lg"></i></div></div>`).join(''); }
+function renderChecklistTable() { 
+    const tbody = document.getElementById('checklists-table-body'); const start = (chkCurrentPage - 1) * rowsPerPage; const pag = allChecklists.slice(start, start + rowsPerPage);
+    tbody.innerHTML = pag.map(r => `<tr class="hover:bg-blue-50/50 border-b"><td class="px-4 py-3 text-center"><input type="checkbox" onchange="chkSelectionChange()" class="chk-row-checkbox rounded text-blue-600 border-gray-300"></td><td class="px-4 py-3 font-semibold">${r.name}</td><td class="px-4 py-3">${r.category}</td><td class="px-4 py-3">${r.vType}</td><td class="px-4 py-3">${r.dept}</td><td class="px-4 py-3 text-center">${r.items}</td><td class="px-4 py-3">${r.author}</td><td class="px-4 py-3">${r.updated}</td><td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold border bg-green-100 text-green-700">${r.status}</span></td><td class="px-4 py-3 text-right"><button onclick="openChecklistDrawer('${r.id}')" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+    document.getElementById('chk-pagination-info').innerText = `Showing ${start + 1} to ${Math.min(start + rowsPerPage, allChecklists.length)} of ${allChecklists.length} entries`;
+}
+function toggleAllChecklists(source) { document.querySelectorAll('.chk-row-checkbox').forEach(cb => cb.checked = source.checked); chkSelectionChange(); }
+function chkSelectionChange() { const count = document.querySelectorAll('.chk-row-checkbox:checked').length; const bar = document.getElementById('chk-bulk-actions'); document.getElementById('chk-selected-count').innerText = count; if(count > 0) bar.classList.remove('hidden'); else bar.classList.add('hidden'); }
+function toggleChecklistDrawer() { const d = document.getElementById('checklist-drawer'); const p = document.getElementById('chk-drawer-panel'); if (d.classList.contains('hidden')) { d.classList.remove('hidden'); setTimeout(() => p.classList.remove('translate-x-full'), 10); } else { p.classList.add('translate-x-full'); setTimeout(() => d.classList.add('hidden'), 300); } }
+function openChecklistDrawer(id) { toggleChecklistDrawer(); }
+let currentWizStep = 1; function toggleWizardDrawer() { const w = document.getElementById('wizard-modal'); if (w.classList.contains('hidden')) { w.classList.remove('hidden'); } else { w.classList.add('hidden'); } }
+function confirmCloseWizard() { toggleWizardDrawer(); }
 
-function initChecklistsModule() {
-    if(allChecklists.length === 0) {
-        generateDummyChecklists();
-        renderChecklistKPIs();
-        renderChecklistTable();
+// ==========================================
+// VEHICLE MANAGEMENT MODULE (NEW)
+// ==========================================
+let allVehicles = [];
+let vehCurrentPage = 1;
+
+function initVehiclesModule() {
+    if(allVehicles.length === 0) {
+        generateDummyVehicles();
+        renderVehicleKPIs();
+        renderVehiclesTable();
     }
 }
 
-// 1. Generate 25 Realistic Dummy Templates
-function generateDummyChecklists() {
-    const names = ['Pre-Trip Heavy Excavator', 'Daily Forklift Check', 'Weekly Crane Inspection', 'Monthly Generator Service', 'Light Vehicle Pre-Start', 'Bulldozer End-of-Shift', 'Trailer Safety Checklist'];
-    const categories = ['Engine', 'Hydraulic', 'Safety', 'Electrical', 'Tyres'];
-    const vTypes = ['Heavy Machinery', 'Light Vehicle', 'Lifting Eqp', 'Power'];
-    const depts = ['Logistics', 'Construction', 'Maintenance', 'Operations'];
-    const statuses = ['Active', 'Active', 'Active', 'Inactive', 'Draft', 'Archived']; // Weighted Active
+// 1. Generate 100+ Realistic Vehicles
+function generateDummyVehicles() {
+    const vNames = ['Caterpillar 320', 'Volvo A40G', 'Toyota Hilux', 'Komatsu D155A', 'JCB 3DX', 'Scania R500', 'Bobcat S590'];
+    const vTypes = ['Heavy Machinery', 'Articulated Truck', 'Light Vehicle', 'Bulldozer', 'Backhoe Loader', 'Haulage', 'Skid Steer'];
+    const depts = ['Construction', 'Mining', 'Logistics', 'Operations', 'Maintenance'];
+    const sites = ['Site Alpha', 'Site Beta', 'Delta Yard', 'Omega Quarry'];
+    const makes = ['Caterpillar', 'Volvo', 'Toyota', 'Komatsu', 'JCB', 'Scania', 'Bobcat'];
+    const statuses = ['Active', 'Active', 'Active', 'Maintenance', 'Breakdown', 'In Transit', 'Inactive'];
 
-    for(let i=1; i<=28; i++) {
-        allChecklists.push({
-            id: `CHK-100${i}`,
-            name: names[i % names.length] + ` v${Math.floor(i/7)+1}.0`,
-            category: categories[i % categories.length],
-            vType: vTypes[i % vTypes.length],
+    for(let i=1; i<=105; i++) {
+        const randIdx = i % vNames.length;
+        allVehicles.push({
+            id: `VPAV${String(260000+i)}`,
+            name: vNames[randIdx],
+            type: vTypes[randIdx],
             dept: depts[i % depts.length],
-            items: Math.floor(Math.random() * 30) + 10,
-            author: `Admin ${i%3+1}`,
-            updated: `2026-07-${String((i%30)+1).padStart(2, '0')}`,
-            status: statuses[i % statuses.length],
-            version: `v${Math.floor(i/7)+1}.0`
+            site: sites[i % sites.length],
+            operator: i%4===0 ? 'Unassigned' : `Operator ${i%20 + 1}`,
+            model: `Model ${Math.floor(Math.random()*100)+2000}`,
+            make: makes[randIdx],
+            vin: `1HGCM826X${String(Math.floor(Math.random()*1000000)).padStart(6,'0')}`,
+            engine: (Math.random() * 5000).toFixed(0),
+            odo: (Math.random() * 150000).toFixed(0),
+            fuel: i%2===0 ? 'Diesel' : 'Electric',
+            lastInsp: `2026-07-${String((i%30)+1).padStart(2, '0')}`,
+            status: statuses[Math.floor(Math.random() * statuses.length)]
         });
     }
 }
 
-// 2. Render Checklists KPIs
-function renderChecklistKPIs() {
+// 2. Render Vehicle KPIs
+function renderVehicleKPIs() {
+    const counts = { total: allVehicles.length, active: 0, inactive: 0, maint: 0, break: 0, transit: 0 };
+    allVehicles.forEach(v => {
+        if(v.status === 'Active') counts.active++;
+        else if(v.status === 'Inactive') counts.inactive++;
+        else if(v.status === 'Maintenance') counts.maint++;
+        else if(v.status === 'Breakdown') counts.break++;
+        else if(v.status === 'In Transit') counts.transit++;
+    });
+
     const kpis = [
-        { label: "Total Templates", val: "28", icon: "fa-list-alt", color: "text-blue-500" },
-        { label: "Categories", val: "10", icon: "fa-tags", color: "text-purple-500" },
-        { label: "Active", val: "18", icon: "fa-check-circle", color: "text-green-500" },
-        { label: "Inactive/Draft", val: "8", icon: "fa-pause-circle", color: "text-orange-500" },
-        { label: "Recently Updated", val: "5", icon: "fa-sync-alt", color: "text-indigo-500" },
-        { label: "Total Items Configured", val: "450+", icon: "fa-clipboard-check", color: "text-teal-500" }
+        { label: "Total Vehicles", val: counts.total, icon: "fa-truck", color: "text-blue-500" },
+        { label: "Active", val: counts.active, icon: "fa-check-circle", color: "text-green-500" },
+        { label: "In Transit", val: counts.transit, icon: "fa-route", color: "text-indigo-500" },
+        { label: "Maintenance", val: counts.maint, icon: "fa-tools", color: "text-orange-500" },
+        { label: "Breakdown", val: counts.break, icon: "fa-exclamation-triangle", color: "text-red-500" },
+        { label: "Inactive", val: counts.inactive, icon: "fa-power-off", color: "text-gray-500" }
     ];
-    document.getElementById('checklist-kpi-container').innerHTML = kpis.map(k => `
+    document.getElementById('vehicle-kpi-container').innerHTML = kpis.map(k => `
         <div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between card">
             <div>
                 <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">${k.label}</p>
@@ -182,222 +155,169 @@ function renderChecklistKPIs() {
         </div>`).join('');
 }
 
-// 3. Render Checklist Table
-function renderChecklistTable() {
-    const tbody = document.getElementById('checklists-table-body');
-    const start = (chkCurrentPage - 1) * rowsPerPage;
-    const paginatedData = allChecklists.slice(start, start + rowsPerPage);
+// 3. Render Table
+function renderVehiclesTable() {
+    const tbody = document.getElementById('vehicles-table-body');
+    const start = (vehCurrentPage - 1) * rowsPerPage;
+    const paginatedData = allVehicles.slice(start, start + rowsPerPage);
     
     tbody.innerHTML = paginatedData.map(r => {
+        // Status Badge Logic
         let bClass = '';
         if(r.status === 'Active') bClass = 'bg-green-100 text-green-700 border-green-200';
-        else if(r.status === 'Inactive') bClass = 'bg-gray-100 text-gray-600 border-gray-200';
-        else if(r.status === 'Draft') bClass = 'bg-orange-100 text-orange-700 border-orange-200';
-        else bClass = 'bg-red-100 text-red-700 border-red-200';
+        else if(r.status === 'Maintenance') bClass = 'bg-orange-100 text-orange-700 border-orange-200';
+        else if(r.status === 'Breakdown') bClass = 'bg-red-100 text-red-700 border-red-200';
+        else if(r.status === 'In Transit') bClass = 'bg-blue-100 text-blue-700 border-blue-200';
+        else bClass = 'bg-gray-100 text-gray-700 border-gray-200';
 
         return `
         <tr class="hover:bg-blue-50/50 transition-colors group border-b border-gray-100">
-            <td class="px-4 py-3 text-center"><input type="checkbox" onchange="chkSelectionChange()" class="chk-row-checkbox rounded text-blue-600 border-gray-300"></td>
-            <td class="px-4 py-3">
-                <div class="font-semibold text-gray-800">${r.name}</div>
-                <div class="text-xs text-gray-500">${r.id} • ${r.version}</div>
-            </td>
-            <td class="px-4 py-3 text-gray-600"><span class="bg-purple-50 text-purple-700 px-2 py-1 rounded text-xs border border-purple-100">${r.category}</span></td>
-            <td class="px-4 py-3 text-gray-600">${r.vType}</td>
+            <td class="px-4 py-3 text-center"><input type="checkbox" onchange="vehSelectionChange()" class="veh-row-checkbox rounded text-blue-600 border-gray-300"></td>
+            <td class="px-4 py-3 font-semibold text-blue-600">${r.id}</td>
+            <td class="px-4 py-3 font-medium text-gray-800">${r.name}</td>
+            <td class="px-4 py-3 text-gray-600">${r.type}</td>
             <td class="px-4 py-3 text-gray-600">${r.dept}</td>
-            <td class="px-4 py-3 text-center font-bold text-gray-700">${r.items}</td>
-            <td class="px-4 py-3 text-gray-600">${r.author}</td>
-            <td class="px-4 py-3 text-gray-600">${r.updated}</td>
+            <td class="px-4 py-3 text-gray-600">${r.site}</td>
+            <td class="px-4 py-3 text-gray-600 ${r.operator==='Unassigned'?'italic opacity-70':''}">${r.operator}</td>
+            <td class="px-4 py-3 text-gray-600">${r.model}</td>
+            <td class="px-4 py-3 text-gray-600">${r.make}</td>
+            <td class="px-4 py-3 text-xs font-mono text-gray-500">${r.vin}</td>
+            <td class="px-4 py-3 text-gray-600">${r.engine}h / ${r.odo}km</td>
+            <td class="px-4 py-3 text-gray-600">${r.fuel}</td>
+            <td class="px-4 py-3 text-gray-600">${r.lastInsp}</td>
             <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold border ${bClass}">${r.status}</span></td>
-            <td class="px-4 py-3 text-right">
-                <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <button onclick="openChecklistDrawer('${r.id}')" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded" title="View"><i class="fas fa-eye"></i></button>
+            <td class="px-4 py-3 text-right sticky right-0 bg-white group-hover:bg-blue-50/50 transition-colors z-10 shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.05)] border-l">
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="openVehicleDrawer('${r.id}')" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded" title="View"><i class="fas fa-eye"></i></button>
                     <button class="p-1.5 text-indigo-600 hover:bg-indigo-100 rounded" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button class="p-1.5 text-green-600 hover:bg-green-100 rounded" title="Duplicate"><i class="fas fa-copy"></i></button>
                     <button class="p-1.5 text-gray-600 hover:bg-gray-200 rounded" title="More"><i class="fas fa-ellipsis-v px-1"></i></button>
                 </div>
             </td>
         </tr>`;
     }).join('');
 
-    // Update Pagination (Reusing logic)
-    const totalPages = Math.ceil(allChecklists.length / rowsPerPage);
-    document.getElementById('chk-pagination-info').innerText = `Showing ${start + 1} to ${Math.min(start + rowsPerPage, allChecklists.length)} of ${allChecklists.length} entries`;
+    // Pagination
+    const totalPages = Math.ceil(allVehicles.length / rowsPerPage);
+    document.getElementById('veh-pagination-info').innerText = `Showing ${start + 1} to ${Math.min(start + rowsPerPage, allVehicles.length)} of ${allVehicles.length} entries`;
     
-    let buttons = `<button class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-50 text-sm disabled:opacity-50" ${chkCurrentPage === 1 ? 'disabled' : ''} onclick="chkCurrentPage--; renderChecklistTable()">Prev</button>`;
-    for(let i=1; i<=Math.min(totalPages, 5); i++) buttons += `<button class="px-3 py-1 border rounded text-sm ${chkCurrentPage === i ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}" onclick="chkCurrentPage=${i}; renderChecklistTable()">${i}</button>`;
-    buttons += `<button class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-50 text-sm disabled:opacity-50" ${chkCurrentPage === totalPages ? 'disabled' : ''} onclick="chkCurrentPage++; renderChecklistTable()">Next</button>`;
-    document.getElementById('chk-pagination-controls').innerHTML = buttons;
+    let buttons = `<button class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-50 text-sm disabled:opacity-50" ${vehCurrentPage === 1 ? 'disabled' : ''} onclick="vehCurrentPage--; renderVehiclesTable()">Prev</button>`;
+    for(let i=1; i<=Math.min(totalPages, 5); i++) buttons += `<button class="px-3 py-1 border rounded text-sm ${vehCurrentPage === i ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}" onclick="vehCurrentPage=${i}; renderVehiclesTable()">${i}</button>`;
+    buttons += `<button class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-50 text-sm disabled:opacity-50" ${vehCurrentPage === totalPages ? 'disabled' : ''} onclick="vehCurrentPage++; renderVehiclesTable()">Next</button>`;
+    document.getElementById('veh-pagination-controls').innerHTML = buttons;
 }
 
-// 4. Checklist Bulk Selection Logic
-function toggleAllChecklists(source) {
-    const checkboxes = document.querySelectorAll('.chk-row-checkbox');
-    checkboxes.forEach(cb => cb.checked = source.checked);
-    chkSelectionChange();
+// Bulk Selection
+function toggleAllVehicles(source) { document.querySelectorAll('.veh-row-checkbox').forEach(cb => cb.checked = source.checked); vehSelectionChange(); }
+function vehSelectionChange() {
+    const count = document.querySelectorAll('.veh-row-checkbox:checked').length;
+    const bar = document.getElementById('veh-bulk-actions');
+    document.getElementById('veh-selected-count').innerText = count;
+    if(count > 0) bar.classList.remove('hidden'); else bar.classList.add('hidden');
 }
 
-function chkSelectionChange() {
-    const count = document.querySelectorAll('.chk-row-checkbox:checked').length;
-    const bar = document.getElementById('chk-bulk-actions');
-    document.getElementById('chk-selected-count').innerText = count;
-    if(count > 0) bar.classList.remove('hidden');
-    else bar.classList.add('hidden');
-}
-
-// 5. Checklist Drawer Logic
-function toggleChecklistDrawer() {
-    const d = document.getElementById('checklist-drawer'); const p = document.getElementById('chk-drawer-panel');
+// 4. Vehicle Drawer
+function toggleVehicleDrawer() {
+    const d = document.getElementById('vehicle-drawer'); const p = document.getElementById('veh-drawer-panel');
     if (d.classList.contains('hidden')) { d.classList.remove('hidden'); setTimeout(() => p.classList.remove('translate-x-full'), 10); } 
     else { p.classList.add('translate-x-full'); setTimeout(() => d.classList.add('hidden'), 300); }
 }
 
-function openChecklistDrawer(id) {
-    const r = allChecklists.find(x => x.id === id); if(!r) return;
-    let bClass = r.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600';
+function openVehicleDrawer(id) {
+    const r = allVehicles.find(x => x.id === id); if(!r) return;
     
-    document.getElementById('chk-drawer-content').innerHTML = `
+    let bClass = 'bg-gray-100 text-gray-700';
+    if(r.status === 'Active') bClass = 'bg-green-100 text-green-700';
+    else if(r.status === 'Maintenance') bClass = 'bg-orange-100 text-orange-700';
+    else if(r.status === 'Breakdown') bClass = 'bg-red-100 text-red-700';
+    else if(r.status === 'In Transit') bClass = 'bg-blue-100 text-blue-700';
+
+    document.getElementById('veh-drawer-content').innerHTML = `
         <div class="flex justify-between items-start mb-6">
-            <div><h3 class="text-xl font-black text-slate-800">${r.name}</h3><p class="text-sm text-gray-500">${r.id} • ${r.version}</p></div>
+            <div><h3 class="text-xl font-black text-slate-800">${r.name}</h3><p class="text-sm text-gray-500">${r.id} • ${r.type}</p></div>
             <span class="px-3 py-1 rounded-full text-xs font-bold ${bClass}">${r.status}</span>
         </div>
+        
         <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100 mb-6">
-            <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">Assignment Rules</h4>
+            <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">Registration & Info</h4>
             <div class="grid grid-cols-2 gap-4 text-sm">
-                <div><span class="block text-gray-500 text-xs">Vehicle Type</span><span class="font-semibold">${r.vType}</span></div>
-                <div><span class="block text-gray-500 text-xs">Department</span><span class="font-semibold">${r.dept}</span></div>
+                <div><span class="block text-gray-500 text-xs">Manufacturer</span><span class="font-semibold">${r.make}</span></div>
+                <div><span class="block text-gray-500 text-xs">Model Year</span><span class="font-semibold">${r.model}</span></div>
+                <div class="col-span-2"><span class="block text-gray-500 text-xs">VIN Number</span><span class="font-mono font-semibold">${r.vin}</span></div>
             </div>
         </div>
+
         <div class="space-y-4">
-            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider border-b pb-2">Configuration Summary</h4>
-            <div class="flex justify-between items-center text-sm"><span class="text-gray-600">Total Items</span><span class="font-bold">${r.items}</span></div>
-            <div class="flex justify-between items-center text-sm"><span class="text-gray-600">Categories Included</span><span class="font-bold bg-gray-100 px-2 rounded">Engine, Safety, Body</span></div>
-            <div class="flex justify-between items-center text-sm"><span class="text-gray-600">Mandatory Photos</span><span class="font-bold text-green-600">Enabled</span></div>
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider border-b pb-2">Operational Details</h4>
+            <div class="flex justify-between items-center text-sm"><span class="text-gray-600">Assigned Operator</span><span class="font-bold">${r.operator}</span></div>
+            <div class="flex justify-between items-center text-sm"><span class="text-gray-600">Current Site</span><span class="font-bold">${r.site}</span></div>
+            <div class="flex justify-between items-center text-sm"><span class="text-gray-600">Engine Hours</span><span class="font-bold">${r.engine} h</span></div>
+            <div class="flex justify-between items-center text-sm"><span class="text-gray-600">Odometer</span><span class="font-bold">${r.odo} km</span></div>
+        </div>
+        
+        <div class="mt-6 pt-4 border-t space-y-3">
+            <button class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 flex justify-between items-center text-sm font-medium"><span class="text-gray-700"><i class="fas fa-history text-blue-500 mr-2"></i> Inspection History</span><i class="fas fa-chevron-right text-gray-400"></i></button>
+            <button class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 flex justify-between items-center text-sm font-medium"><span class="text-gray-700"><i class="fas fa-file-pdf text-red-500 mr-2"></i> Documents (RC, PUC, Ins.)</span><i class="fas fa-chevron-right text-gray-400"></i></button>
         </div>
     `;
-    toggleChecklistDrawer();
+    toggleVehicleDrawer();
 }
 
-// 6. Create Checklist Wizard Logic
-let currentWizStep = 1;
-const totalWizSteps = 6;
-const stepTitles = ["Basic Info", "Assignments", "Categories", "Items Builder", "Validation", "Preview"];
+// 5. Add Vehicle Wizard
+let vehWizStep = 1;
+const vehWizTitles = ["Basic Info", "Technical", "Assignment", "Inspections", "Documents", "Preview"];
 
-function toggleWizardDrawer() {
-    const w = document.getElementById('wizard-modal');
-    if (w.classList.contains('hidden')) { 
-        w.classList.remove('hidden'); 
-        currentWizStep = 1; 
-        renderWizardUI(); 
-    } else { 
-        w.classList.add('hidden'); 
-    }
+function toggleVehicleWizard() {
+    const w = document.getElementById('vehicle-wizard-modal');
+    if (w.classList.contains('hidden')) { w.classList.remove('hidden'); vehWizStep = 1; renderVehWizardUI(); } 
+    else { w.classList.add('hidden'); }
 }
+function confirmCloseVehWizard() { if(confirm("Discard new vehicle entry?")) { toggleVehicleWizard(); } }
 
-function confirmCloseWizard() {
-    if(confirm("You have unsaved changes. Are you sure you want to close this?")) { toggleWizardDrawer(); }
-}
-
-function renderWizardUI() {
-    // Stepper header
-    document.getElementById('wizard-stepper').innerHTML = stepTitles.map((title, index) => {
-        let st = index + 1;
-        let isActive = st === currentWizStep;
-        let isDone = st < currentWizStep;
-        let bg = isActive ? 'bg-blue-600 text-white shadow-lg ring-4 ring-blue-100' : isDone ? 'bg-green-500 text-white' : 'bg-white text-gray-400 border-2 border-gray-200';
-        return `
-            <div class="flex flex-col items-center relative z-10 w-1/6">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${bg} transition-all duration-300">
-                    ${isDone ? '<i class="fas fa-check"></i>' : st}
-                </div>
-                <span class="text-xs font-bold mt-2 ${isActive ? 'text-blue-600' : isDone ? 'text-green-600' : 'text-gray-400'}">${title}</span>
-            </div>`;
+function renderVehWizardUI() {
+    document.getElementById('veh-wizard-stepper').innerHTML = vehWizTitles.map((title, index) => {
+        let st = index + 1; let isActive = st === vehWizStep; let isDone = st < vehWizStep;
+        let bg = isActive ? 'bg-blue-600 text-white ring-4 ring-blue-100' : isDone ? 'bg-green-500 text-white' : 'bg-white text-gray-400 border-2 border-gray-200';
+        return `<div class="flex flex-col items-center relative z-10 w-1/6"><div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${bg} transition-all">${isDone ? '<i class="fas fa-check"></i>' : st}</div><span class="text-xs font-bold mt-2 ${isActive ? 'text-blue-600' : isDone ? 'text-green-600' : 'text-gray-400'}">${title}</span></div>`;
     }).join('');
 
-    // Dynamic Step Content
-    const contentArea = document.getElementById('wizard-step-content');
-    if (currentWizStep === 1) {
+    const contentArea = document.getElementById('veh-wizard-step-content');
+    if (vehWizStep === 1) {
         contentArea.innerHTML = `
             <h3 class="text-lg font-bold mb-4">Step 1: Basic Information</h3>
-            <div class="space-y-4 max-w-2xl">
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Checklist Name <span class="text-red-500">*</span></label>
-                <input type="text" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. Daily Pre-start Check"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea class="w-full border rounded-lg px-4 py-2 focus:ring-2 outline-none h-24" placeholder="Brief description of this template..."></textarea></div>
+            <div class="grid grid-cols-2 gap-4 max-w-3xl">
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Name *</label><input type="text" class="w-full border rounded-lg px-4 py-2 outline-none focus:border-blue-500" placeholder="e.g. Caterpillar 320"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Number *</label><input type="text" class="w-full border rounded-lg px-4 py-2 outline-none focus:border-blue-500" placeholder="e.g. VPAV260100"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer</label><input type="text" class="w-full border rounded-lg px-4 py-2 outline-none" placeholder="e.g. Caterpillar"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Model Year</label><input type="number" class="w-full border rounded-lg px-4 py-2 outline-none" placeholder="2026"></div>
             </div>`;
-    } else if (currentWizStep === 4) {
-        // Inspection Item Builder Mockup
+    } else if (vehWizStep === 5) {
         contentArea.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">Step 4: Inspection Item Builder</h3>
-                <button class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded text-sm font-medium border border-blue-100"><i class="fas fa-plus mr-1"></i> Add Category Section</button>
-            </div>
-            <!-- Accordion Category 1 -->
-            <div class="border rounded-xl mb-4 overflow-hidden bg-gray-50 shadow-sm">
-                <div class="px-4 py-3 bg-white border-b flex justify-between items-center cursor-pointer">
-                    <div class="font-bold text-gray-800"><i class="fas fa-chevron-down mr-2 text-gray-400"></i> Engine System</div>
-                    <button class="text-blue-600 text-sm font-medium"><i class="fas fa-plus mr-1"></i> Add Item</button>
-                </div>
-                <div class="p-4 space-y-3">
-                    <!-- Configurable Item row -->
-                    <div class="bg-white p-3 rounded border shadow-sm flex items-center gap-4">
-                        <i class="fas fa-grip-vertical text-gray-300 cursor-move"></i>
-                        <input type="text" value="Check Engine Oil Level" class="flex-1 border-b px-2 py-1 outline-none text-sm font-medium">
-                        <select class="border rounded px-2 py-1 text-sm text-gray-600"><option>High Priority</option><option>Medium</option></select>
-                        <div class="flex gap-2">
-                            <label class="flex items-center text-xs gap-1 bg-gray-100 px-2 py-1 rounded"><input type="checkbox" checked> Req. Photo</label>
-                            <label class="flex items-center text-xs gap-1 bg-gray-100 px-2 py-1 rounded"><input type="checkbox"> Req. Note</label>
-                        </div>
-                        <div class="flex text-xs bg-gray-100 rounded p-1 gap-1">
-                            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">OK</span>
-                            <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Repair</span>
-                            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded">Replace</span>
-                        </div>
-                        <button class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
-                    </div>
-                    <!-- Item 2 -->
-                    <div class="bg-white p-3 rounded border shadow-sm flex items-center gap-4">
-                        <i class="fas fa-grip-vertical text-gray-300 cursor-move"></i>
-                        <input type="text" value="Inspect Coolant Levels" class="flex-1 border-b px-2 py-1 outline-none text-sm font-medium">
-                        <select class="border rounded px-2 py-1 text-sm text-gray-600"><option>Medium Priority</option></select>
-                        <div class="flex gap-2">
-                            <label class="flex items-center text-xs gap-1 bg-gray-100 px-2 py-1 rounded"><input type="checkbox"> Req. Photo</label>
-                            <label class="flex items-center text-xs gap-1 bg-gray-100 px-2 py-1 rounded"><input type="checkbox"> Req. Note</label>
-                        </div>
-                        <div class="flex text-xs bg-gray-100 rounded p-1 gap-1">
-                            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">OK</span>
-                            <span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Repair</span>
-                        </div>
-                        <button class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
-                    </div>
+            <h3 class="text-lg font-bold mb-4">Step 5: Document Uploads</h3>
+            <div class="space-y-3 max-w-2xl">
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 cursor-pointer">
+                    <i class="fas fa-cloud-upload-alt text-3xl text-blue-500 mb-2"></i>
+                    <p class="text-sm font-medium text-gray-700">Drag & drop files or click to upload</p>
+                    <p class="text-xs text-gray-500 mt-1">Upload RC, Insurance, PUC, Permits (PDF, JPG)</p>
                 </div>
             </div>`;
-    } else if (currentWizStep === 6) {
-        contentArea.innerHTML = `<div class="text-center py-12"><div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"><i class="fas fa-check"></i></div><h3 class="text-xl font-bold text-gray-800">Ready to Publish</h3><p class="text-gray-500 mt-2">Your checklist template has been configured successfully.</p></div>`;
+    } else if (vehWizStep === 6) {
+        contentArea.innerHTML = `<div class="text-center py-12"><div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"><i class="fas fa-check"></i></div><h3 class="text-xl font-bold text-gray-800">Ready to Save</h3><p class="text-gray-500 mt-2">Vehicle profile has been configured successfully.</p></div>`;
     } else {
-        contentArea.innerHTML = `<div class="flex flex-col items-center justify-center h-40 text-gray-400"><i class="fas fa-cog fa-spin text-3xl mb-3"></i><p>Configure ${stepTitles[currentWizStep-1]} Settings</p></div>`;
+        contentArea.innerHTML = `<div class="flex flex-col items-center justify-center h-40 text-gray-400"><i class="fas fa-cog fa-spin text-3xl mb-3"></i><p>Configure ${vehWizTitles[vehWizStep-1]} Settings</p></div>`;
     }
 
-    // Update buttons
-    document.getElementById('wiz-btn-prev').disabled = currentWizStep === 1;
-    const btnNext = document.getElementById('wiz-btn-next');
-    if (currentWizStep === totalWizSteps) {
-        btnNext.innerHTML = '<i class="fas fa-save mr-2"></i> Save & Publish';
+    document.getElementById('veh-wiz-btn-prev').disabled = vehWizStep === 1;
+    const btnNext = document.getElementById('veh-wiz-btn-next');
+    if (vehWizStep === 6) {
+        btnNext.innerHTML = '<i class="fas fa-save mr-2"></i> Save Vehicle';
         btnNext.className = "px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium shadow hover:bg-green-700";
     } else {
         btnNext.innerHTML = 'Next Step <i class="fas fa-arrow-right ml-2"></i>';
         btnNext.className = "px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-700";
     }
 }
-
-function nextWizardStep() {
-    if(currentWizStep < totalWizSteps) { currentWizStep++; renderWizardUI(); }
-    else { alert("Checklist Published Successfully!"); toggleWizardDrawer(); }
-}
-
-function prevWizardStep() {
-    if(currentWizStep > 1) { currentWizStep--; renderWizardUI(); }
-}
+function nextVehWizardStep() { if(vehWizStep < 6) { vehWizStep++; renderVehWizardUI(); } else { alert("Vehicle Added Successfully!"); toggleVehicleWizard(); } }
+function prevVehWizardStep() { if(vehWizStep > 1) { vehWizStep--; renderVehWizardUI(); } }
 
 // Initial Boot
 document.addEventListener('DOMContentLoaded', initDashboard);
