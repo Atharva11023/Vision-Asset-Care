@@ -11,17 +11,17 @@
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
-        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col">
+        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col z-20">
             <div class="p-6 text-xl font-bold border-b border-slate-800">VAC v1.0</div>
             <nav class="flex-1 mt-6 px-4 space-y-2">
-                <a href="#" onclick="switchView('view-dashboard')" class="flex items-center py-2.5 px-4 bg-blue-600 rounded-lg"><i class="fas fa-th-large mr-3"></i>Dashboard</a>
-                <a href="#" onclick="switchView('view-reports')" class="flex items-center py-2.5 px-4 hover:bg-slate-800 rounded-lg"><i class="fas fa-file-alt mr-3"></i>Inspection Reports</a>
+                <a href="#" onclick="switchView('view-dashboard')" class="flex items-center py-2.5 px-4 bg-blue-600 rounded-lg" id="nav-dashboard"><i class="fas fa-th-large mr-3"></i>Dashboard</a>
+                <a href="#" onclick="switchView('view-reports')" class="flex items-center py-2.5 px-4 hover:bg-slate-800 rounded-lg" id="nav-reports"><i class="fas fa-file-alt mr-3"></i>Inspection Reports</a>
             </nav>
             <div class="p-4 text-xs text-slate-500 text-center border-t border-slate-800">Vision Asset Care © 2026</div>
         </aside>
 
-        <main id="main-content" class="flex-1 flex flex-col overflow-y-auto">
-            <header class="h-[70px] bg-white border-b flex items-center justify-between px-8">
+        <main id="main-content" class="flex-1 flex flex-col overflow-y-auto relative">
+            <header class="h-[70px] bg-white border-b flex items-center justify-between px-8 sticky top-0 z-10">
                 <h1 class="font-bold text-slate-700">Fleet Inspection Management</h1>
                 <div class="flex items-center gap-4"><span id="live-clock" class="text-sm font-mono text-gray-500"></span></div>
             </header>
@@ -44,17 +44,123 @@
                 </div>
             </div>
 
-            <div id="view-reports" class="hidden p-8">
-                <h1 class="font-bold text-2xl mb-6">Inspection Reports</h1>
-                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-gray-50 border-b"><tr><th class="p-4">Report No</th><th class="p-4">Vehicle</th><th class="p-4">Status</th></tr></thead>
-                        <tbody id="reports-table-body" class="divide-y"></tbody>
-                    </table>
+            <div id="view-reports" class="hidden p-8 space-y-6 bg-gray-50 min-h-full">
+                
+                <div class="flex justify-between items-end">
+                    <div>
+                        <h1 class="font-bold text-2xl text-slate-800">Inspection Reports</h1>
+                        <p class="text-sm text-gray-500 mt-1">Manage, search, review and download vehicle inspection reports.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button class="bg-white border text-gray-700 px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-gray-50 font-medium"><i class="fas fa-file-excel mr-2 text-green-600"></i>Export Excel</button>
+                        <button class="bg-white border text-gray-700 px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-gray-50 font-medium"><i class="fas fa-file-pdf mr-2 text-red-600"></i>Export PDF</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-6 gap-4" id="report-kpi-container">
+                    </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border space-y-4">
+                    <div class="grid grid-cols-5 gap-4">
+                        <input type="text" id="search-report" placeholder="Search Report No..." class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <input type="text" id="search-vehicle" placeholder="Search Vehicle No/Name..." class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                        <input type="text" id="search-operator" placeholder="Search Operator..." class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                        <select class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                            <option value="">All Sites</option><option>Site A</option><option>Site B</option>
+                        </select>
+                        <select class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                            <option value="">All Departments</option><option>Logistics</option><option>Construction</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <select class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 w-40">
+                                <option value="">All Statuses</option>
+                                <option>Approved</option><option>Pending</option><option>Rejected</option><option>Draft</option>
+                            </select>
+                            <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                                <button class="px-3 py-1 bg-white shadow-sm rounded text-xs font-medium">Today</button>
+                                <button class="px-3 py-1 text-gray-500 hover:text-gray-700 text-xs font-medium">7 Days</button>
+                                <button class="px-3 py-1 text-gray-500 hover:text-gray-700 text-xs font-medium">30 Days</button>
+                                <button class="px-3 py-1 text-gray-500 hover:text-gray-700 text-xs font-medium">Custom</button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="text-gray-500 px-4 py-2 text-sm font-medium hover:text-gray-700" onclick="resetFilters()">Reset</button>
+                            <button class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm shadow-blue-200">Search</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border flex flex-col relative">
+                    <div id="table-loading" class="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center rounded-xl hidden">
+                        <i class="fas fa-circle-notch fa-spin text-3xl text-blue-600 mb-2"></i>
+                        <span class="text-sm text-gray-500 font-medium">Loading reports...</span>
+                    </div>
+
+                    <div id="table-error" class="absolute inset-0 bg-white z-20 flex flex-col items-center justify-center rounded-xl hidden">
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-3"></i>
+                        <h3 class="text-lg font-bold text-gray-800">Failed to load data</h3>
+                        <p class="text-sm text-gray-500 mb-4">Please check your connection and try again.</p>
+                        <button onclick="loadReportsData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Retry</button>
+                    </div>
+
+                    <div id="table-empty" class="absolute inset-0 bg-white z-20 flex flex-col items-center justify-center rounded-xl hidden">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-search box-open text-3xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">No reports found</h3>
+                        <p class="text-sm text-gray-500">Try adjusting your search or filters.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left whitespace-nowrap">
+                            <thead class="bg-gray-50 text-gray-500 font-medium border-b">
+                                <tr>
+                                    <th class="px-4 py-3 w-10 text-center"><input type="checkbox" class="rounded text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"></th>
+                                    <th class="px-4 py-3 cursor-pointer hover:text-gray-700">Report No <i class="fas fa-sort ml-1"></i></th>
+                                    <th class="px-4 py-3 cursor-pointer hover:text-gray-700">Date <i class="fas fa-sort ml-1"></i></th>
+                                    <th class="px-4 py-3">Vehicle</th>
+                                    <th class="px-4 py-3">Site / Dept</th>
+                                    <th class="px-4 py-3">Operator</th>
+                                    <th class="px-4 py-3">Condition</th>
+                                    <th class="px-4 py-3 text-center">Safe</th>
+                                    <th class="px-4 py-3 text-center">Faults</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reports-table-body" class="divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
+
+                    <div class="border-t px-6 py-4 flex items-center justify-between bg-gray-50 rounded-b-xl">
+                        <span class="text-sm text-gray-500" id="pagination-info">Showing 1 to 10 of 50 entries</span>
+                        <div class="flex gap-1" id="pagination-controls">
+                            </div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <div id="report-drawer" class="fixed inset-0 overflow-hidden z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="toggleDrawer()"></div>
+        <div class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 translate-x-full" id="drawer-panel">
+            <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center"><i class="fas fa-file-alt text-blue-600 mr-2"></i> Report Details</h2>
+                <button onclick="toggleDrawer()" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-6" id="drawer-content">
+                </div>
+            <div class="border-t p-4 bg-gray-50 flex justify-end gap-3">
+                <button class="px-4 py-2 border rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100" onclick="toggleDrawer()">Close</button>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-700"><i class="fas fa-download mr-2"></i>Download PDF</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
