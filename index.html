@@ -3,63 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vision Asset Care | Fleet Dashboard</title>
+    <title>VAC | Fleet Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-100">
-    <div class="flex min-h-screen">
-        <aside class="w-64 bg-slate-900 text-white flex-shrink-0">
-            <div class="p-6 font-bold text-xl border-b border-slate-800">Vision I </div>
-            <nav class="mt-6">
-                <a href="#" class="flex items-center py-3 px-6 bg-blue-600"><i class="fas fa-th-large mr-3"></i>Dashboard</a>
-                <a href="#" class="flex items-center py-3 px-6 hover:bg-slate-800"><i class="fas fa-clipboard-check mr-3"></i>Inspections</a>
-                <a href="#" class="flex items-center py-3 px-6 hover:bg-slate-800"><i class="fas fa-truck mr-3"></i>Vehicles</a>
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col">
+            <div class="p-6 text-xl font-bold border-b border-slate-800">VAC v1.0</div>
+            <nav class="flex-1 mt-6 px-4 space-y-2">
+                <a href="#" onclick="switchView('view-dashboard')" class="flex items-center py-2.5 px-4 bg-blue-600 rounded-lg"><i class="fas fa-th-large mr-3"></i>Dashboard</a>
+                <a href="#" onclick="switchView('view-reports')" class="flex items-center py-2.5 px-4 hover:bg-slate-800 rounded-lg"><i class="fas fa-file-alt mr-3"></i>Inspection Reports</a>
             </nav>
+            <div class="p-4 text-xs text-slate-500 text-center border-t border-slate-800">Vision Asset Care © 2026</div>
         </aside>
 
-        <main class="flex-1">
+        <main id="main-content" class="flex-1 flex flex-col overflow-y-auto">
             <header class="h-[70px] bg-white border-b flex items-center justify-between px-8">
-                <h1 class="font-semibold">Fleet Inspection Management</h1>
-                <div class="flex items-center gap-6 text-sm">
-                    <span id="live-clock"></span>
-                    <i class="fas fa-bell text-gray-500"></i>
-                    <div class="flex items-center gap-2 font-medium"><span>Admin</span></div>
-                </div>
+                <h1 class="font-bold text-slate-700">Fleet Inspection Management</h1>
+                <div class="flex items-center gap-4"><span id="live-clock" class="text-sm font-mono text-gray-500"></span></div>
             </header>
 
-            <div class="p-8 space-y-8">
-                <div class="flex gap-2">
-                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm">Today</button>
-                    <button class="bg-white border px-4 py-1.5 rounded-full text-sm">Last 7 Days</button>
-                    <button class="bg-white border px-4 py-1.5 rounded-full text-sm">Custom Date</button>
+            <div id="view-dashboard" class="p-8 space-y-6">
+                <div class="flex items-center gap-2 bg-white p-2 rounded-full shadow-sm border text-sm">
+                    <button class="bg-blue-600 text-white px-4 py-1 rounded-full">Today</button>
+                    <button class="px-4 py-1 hover:bg-gray-100 rounded-full">7 Days</button>
                 </div>
-
                 <div id="kpi-grid" class="grid grid-cols-6 gap-4"></div>
-
                 <div class="grid grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm"><canvas id="issueChart"></canvas></div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm"><canvas id="inspectionChart"></canvas></div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm"><canvas id="faultChart"></canvas></div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border mt-6">
-                    <h2 class="text-lg font-bold mb-4">Recent Inspections</h2>
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="text-gray-400 text-xs uppercase border-b">
-                                <th class="pb-3">Report No</th>
-                                <th class="pb-3">Date</th>
-                                <th class="pb-3">Vehicle</th>
-                                <th class="pb-3">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inspection-table-body" class="text-sm"></tbody>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><canvas id="issueChart"></canvas></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><canvas id="inspectionChart"></canvas></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><canvas id="faultChart"></canvas></div>
+                </div>
+                <div class="grid grid-cols-3 gap-6 mt-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h2 class="font-bold mb-4 text-sm">Top Faulty</h2><div id="faulty-vehicles-list"></div></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h2 class="font-bold mb-4 text-sm">Top Repair</h2><div id="repair-items-list"></div></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h2 class="font-bold mb-4 text-sm">Top Replace</h2><div id="replace-items-list"></div></div>
+                </div>
+            </div>
+
+            <div id="view-reports" class="hidden p-8">
+                <h1 class="font-bold text-2xl mb-6">Inspection Reports</h1>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 border-b"><tr><th class="p-4">Report No</th><th class="p-4">Vehicle</th><th class="p-4">Status</th></tr></thead>
+                        <tbody id="reports-table-body" class="divide-y"></tbody>
                     </table>
                 </div>
             </div>
         </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
